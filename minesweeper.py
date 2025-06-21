@@ -232,7 +232,7 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        
     
     def neighbours(self, cell):
         neighbours = set()
@@ -261,15 +261,21 @@ class MinesweeperAI():
 
     # After inferring new sentences in infer_knowledge(), we check if we can mark any cell as mine or safe
     def resolve_cells_from_knowledge(self):
+        safe_cells = []
+        mine_cells = []
         for sentence in self.knowledge:
             # Means all cells are safe if count == 0
             if len(sentence.cells) == 0 == sentence.count:
-                for cell in sentence.cells:
-                    self.mark_safe(cell)
+                safe_cells.append(sentence.cells)
 
             # Otherwise, they are mines
             if len(sentence.cells) == sentence.count != 0:
-                for cell in sentence.cells:
-                    self.mark_mine(cell)
+                mine_cells.append(sentence.cells)
+
+        for cell in safe_cells:
+            self.mark_safe(cell)
+            
+        for cell in mine_cells:
+            self.mark_mine(cell)
 
 
