@@ -1,5 +1,6 @@
 import itertools
 import random
+import numpy as np
 
 
 class Minesweeper():
@@ -197,18 +198,10 @@ class MinesweeperAI():
         unexplored_cells = neighbour_cells.difference(self.mines, self.safes)
         new_knowledge = Sentence(unexplored_cells, count)
         self.knowledge.append(new_knowledge)
-        print("KNOWLEDGE BEFORE")
-        for sentence in self.knowledge:
-            print(str(sentence))
-        print()
 
         self.infer_knowledge(new_knowledge)
 
         self.resolve_cells_from_knowledge()
-
-        print("KNOWLEDGE SO FAR")
-        for sentence in self.knowledge:
-            print(str(sentence))
 
 
     def make_safe_move(self):
@@ -232,6 +225,18 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
+        all_cells = set()
+        for i in range (0,self.height):
+            for j in range(0, self.width):
+                all_cells.add((i, j))
+
+        possible_moves = all_cells.difference(self.moves_made)
+        possible_moves = possible_moves.difference(self.mines)
+
+        if possible_moves != set():
+            return possible_moves.pop()
+
+        return None
         
     
     def neighbours(self, cell):
@@ -274,7 +279,7 @@ class MinesweeperAI():
 
         for cell in safe_cells:
             self.mark_safe(cell)
-            
+
         for cell in mine_cells:
             self.mark_mine(cell)
 
