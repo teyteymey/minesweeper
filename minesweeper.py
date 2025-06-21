@@ -197,10 +197,18 @@ class MinesweeperAI():
         unexplored_cells = neighbour_cells.difference(self.mines, self.safes)
         new_knowledge = Sentence(unexplored_cells, count)
         self.knowledge.append(new_knowledge)
+        print("KNOWLEDGE BEFORE")
+        for sentence in self.knowledge:
+            print(str(sentence))
+        print()
 
         self.infer_knowledge(new_knowledge)
 
         self.resolve_cells_from_knowledge()
+
+        print("KNOWLEDGE SO FAR")
+        for sentence in self.knowledge:
+            print(str(sentence))
 
 
     def make_safe_move(self):
@@ -212,7 +220,10 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
+        safe_cells = self.safes.difference(self.moves_made)
+        if len(safe_cells) != 0:
+            return safe_cells[0]
+        return None
 
     def make_random_move(self):
         """
@@ -229,7 +240,6 @@ class MinesweeperAI():
             for j in range(-1,2):
                 neighbours.add((cell[0]+i, cell[1]+j))
 
-        print(neighbours)
         #remove self
         neighbours.remove(cell)
         return neighbours
@@ -237,11 +247,17 @@ class MinesweeperAI():
     # Used to get new knowledge from existing sentences and infer mines or safe places
     def infer_knowledge(self, new_knowledge):
         for sentence in self.knowledge:
-            if new_knowledge.cells.issubset(sentence.cells) and new_knowledge.cells.difference(sentence.cells) != {} :
-                print("is subset of " + str(sentence))
+            if new_knowledge.cells.issubset(sentence.cells) and new_knowledge.cells.difference(sentence.cells) != set() :
+                print(str(new_knowledge) + " is subset of " + str(sentence))
                 inferred_cells = sentence.cells.difference(new_knowledge.cells)
+                print("in cells  " + str(inferred_cells))
                 inferred_count = sentence.cells - new_knowledge.cells
-                self.knowledge.append(Sentence(inferred_cells, inferred_count))
+                inferred_sentence = Sentence(inferred_cells, inferred_count)
+                self.knowledge.append(inferred_sentence)
+                print("KNOWLEDGE WITH INFERRED")
+                for sentence in self.knowledge:
+                    print(str(sentence))
+                print()
 
     # After inferring new sentences in infer_knowledge(), we check if we can mark any cell as mine or safe
     def resolve_cells_from_knowledge(self):
@@ -250,7 +266,7 @@ class MinesweeperAI():
             if len(sentence.cells) == 0 == sentence.count:
                 for cell in sentence.cells:
                     self.mark_safe(cell)
-                    
+
             # Otherwise, they are mines
             if len(sentence.cells) == sentence.count != 0:
                 for cell in sentence.cells:
