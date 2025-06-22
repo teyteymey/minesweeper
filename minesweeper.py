@@ -132,7 +132,8 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        if (cell in self.cells):
+        #do not remove it count eq 0 bc it means that they are all safe
+        if (cell in self.cells) and self.count != 0:
             self.cells.remove(cell)
 
 
@@ -213,9 +214,11 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        print("safe cells: " + str(self.safes))
         safe_cells = self.safes.difference(self.moves_made)
+        print("safe cells that are allowed: " + str(safe_cells))
         if len(safe_cells) != 0:
-            return safe_cells[0]
+            return safe_cells.pop()
         return None
 
     def make_random_move(self):
@@ -230,14 +233,12 @@ class MinesweeperAI():
             for j in range(0, self.width):
                 all_cells.add((i, j))
 
-        possible_moves = all_cells.difference(self.moves_made)
-        possible_moves = possible_moves.difference(self.mines)
+        possible_moves = all_cells.difference(self.moves_made, self.mines)
 
         if possible_moves != set():
             return possible_moves.pop()
 
         return None
-        
     
     def neighbours(self, cell):
         neighbours = set()
@@ -247,36 +248,38 @@ class MinesweeperAI():
 
         #remove self
         neighbours.remove(cell)
+        # remove cells that are out of board in a very cool way hehehe
+        neighbours.difference_update({cell for cell in neighbours if any(x in {-1, 8} for x in cell)})
         return neighbours
     
     # Used to get new knowledge from existing sentences and infer mines or safe places
     def infer_knowledge(self, new_knowledge):
         for sentence in self.knowledge:
-            if new_knowledge.cells.issubset(sentence.cells) and new_knowledge.cells.difference(sentence.cells) != set() :
+            if new_knowledge.cells.issubset(sentence.cells) and len(new_knowledge.cells.difference(sentence.cells))!= 0:
                 print(str(new_knowledge) + " is subset of " + str(sentence))
                 inferred_cells = sentence.cells.difference(new_knowledge.cells)
                 print("in cells  " + str(inferred_cells))
                 inferred_count = sentence.cells - new_knowledge.cells
                 inferred_sentence = Sentence(inferred_cells, inferred_count)
                 self.knowledge.append(inferred_sentence)
-                print("KNOWLEDGE WITH INFERRED")
-                for sentence in self.knowledge:
-                    print(str(sentence))
                 print()
 
     # After inferring new sentences in infer_knowledge(), we check if we can mark any cell as mine or safe
     def resolve_cells_from_knowledge(self):
-        safe_cells = []
-        mine_cells = []
+        safe_cells = set()
+        mine_cells = set()
         for sentence in self.knowledge:
+            print(str(sentence))
             # Means all cells are safe if count == 0
-            if len(sentence.cells) == 0 == sentence.count:
-                safe_cells.append(sentence.cells)
+            if 0 == sentence.count:
+                safe_cells.update(sentence.cells)
 
             # Otherwise, they are mines
             if len(sentence.cells) == sentence.count != 0:
-                mine_cells.append(sentence.cells)
+                mine_cells.update(sentence.cells)
 
+        print("safe inferred cells  " + str(safe_cells))
+        print()
         for cell in safe_cells:
             self.mark_safe(cell)
 
