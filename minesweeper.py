@@ -218,12 +218,14 @@ class MinesweeperAI():
             new_knowledge = Sentence(unexplored_cells, count-(not_counting_mines-len(unexplored_cells)))
             self.knowledge.append(new_knowledge)
 
-        # We know that 2,3 is a mine. Of the 8 neighbours, we remove the safe and moves made to know the remaining ones that are mines.
-        # If we remove the mines around, we know how many mines there are.
-        # If we subtract the length of the first set minus the mines we know around
+        # We know that 2,3 is a mine. Of the 8 neighbours, we remove the safe and moves_made to know the remaining ones that are mines.
+        # If we subtract the length of the first set minus the lenght of the second (removing mines) we know how many mines there is around and we need to substract from count
+
         self.infer_knowledge()
 
         self.resolve_cells_from_knowledge()
+
+        self.infer_knowledge()
 
     def make_safe_move(self):
         """
