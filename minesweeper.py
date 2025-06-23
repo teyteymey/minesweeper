@@ -123,22 +123,17 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        # print("sentence mark mine " + str(self))
         if cell in self.cells:
             self.cells.remove(cell)
             self.count -= 1
-        # print("end sentence mark mine " + str(self))
-
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        # print("sentence mark safe " + str(self))
         if cell in self.cells and self.count > 0:
             self.cells.remove(cell)
-        # print("end sentence mark safe " + str(self))
 
 
 class MinesweeperAI():
@@ -167,13 +162,11 @@ class MinesweeperAI():
         Marks a cell as a mine, and updates all knowledge
         to mark that cell as a mine as well.
         """
-        print("ai mark mine " + str(self))
         self.mines.add(cell)
         to_remove = []
         for sentence in self.knowledge:
             # If all cells are mines or only one cell left that is a mine, remove the sentence because the info is already not useful
             if sentence.count == len(sentence.cells) or sentence.cells == cell:
-                print("remove sentence")
                 to_remove.append(sentence)
             else:
                 sentence.mark_mine(cell)
@@ -186,13 +179,11 @@ class MinesweeperAI():
         Marks a cell as safe, and updates all knowledge
         to mark that cell as safe as well.
         """
-        # print("ai mark safe " + str(cell))
         self.safes.add(cell)
         to_remove = []
         for sentence in self.knowledge:
             # Remove sentence if we know all cells are already safe
             if sentence.count == 0:
-                print("remove sentence")
                 to_remove.append(sentence)
             else:
                 sentence.mark_safe(cell)
@@ -215,9 +206,6 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        print()
-        print()
-        print("ADD KNOWLEDGE")
         self.moves_made.add(cell)
         self.mark_safe(cell)
 
@@ -237,7 +225,6 @@ class MinesweeperAI():
 
         self.resolve_cells_from_knowledge()
 
-
     def make_safe_move(self):
         """
         Returns a safe cell to choose on the Minesweeper board.
@@ -247,9 +234,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        print("safe cells: " + str(self.safes))
         safe_cells = self.safes.difference(self.moves_made)
-        print("safe cells that are allowed: " + str(safe_cells))
         if len(safe_cells) != 0:
             return safe_cells.pop()
         return None
@@ -262,8 +247,8 @@ class MinesweeperAI():
             2) are not known to be mines
         """
         all_cells = set()
-        for i in range (0,self.height):
-            for j in range(0, self.width):
+        for i in range(self.height):
+            for j in range(self.width):
                 all_cells.add((i, j))
 
         possible_moves = all_cells.difference(self.moves_made, self.mines)
@@ -275,9 +260,9 @@ class MinesweeperAI():
     
     def neighbours(self, cell):
         neighbours = set()
-        for i in range (-1,2):
-            for j in range(-1,2):
-                neighbours.add((cell[0]+i, cell[1]+j))
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                neighbours.add((cell[0] + i, cell[1] + j))
 
         # Remove self
         neighbours.remove(cell)
@@ -287,26 +272,24 @@ class MinesweeperAI():
     
     # Used to get new knowledge from existing sentences
     def infer_knowledge(self):
-        print("infer knowledge")
-        print("current knowledge to infer from: ")
-        new_knowledge =  []
+        new_knowledge = []
         used_knowledge = []
         for sentence1 in self.knowledge:
-            print(str(sentence1))
             for sentence2 in self.knowledge:
-                if sentence1.cells.issubset(sentence2.cells) and sentence1 != sentence2 and sentence1.count >= 1 and sentence2.count >= 1:
+                if (
+                    sentence1.cells.issubset(sentence2.cells)
+                    and sentence1 != sentence2
+                    and sentence1.count >= 1
+                    and sentence2.count >= 1
+                ):
                     inferred_cells = sentence2.cells.difference(sentence1.cells)
                     inferred_count = sentence2.count - sentence1.count
                     inferred_sentence = Sentence(inferred_cells, inferred_count)
-                    print(str(sentence1) + " is subset of " + str(sentence2))
-                    print("INFERRED SENTENCE")
-                    print(str(inferred_sentence))
-                    if (inferred_cells == set()):
-                        raise RuntimeError("Inconsistent knowledge") 
+                    if inferred_cells == set():
+                        raise RuntimeError("Inconsistent knowledge")
                     new_knowledge.append(inferred_sentence)
                     used_knowledge.append(sentence2)
-                
-        
+
         # Do it separately to avoid writing while iterating
         for sentence in new_knowledge:
             # Sometimes we infer the same from different sentences
@@ -320,21 +303,14 @@ class MinesweeperAI():
 
     # Check if we can mark any cell as mine or safe
     def resolve_cells_from_knowledge(self):
-        print()
-        print(" @@@@@@ resolve cells from knowledge")
         safe_cells = set()
         mine_cells = set()
-        print("current knowledge: ")
         for sentence in self.knowledge:
-            print(str(sentence))
             safe_cells.update(sentence.known_safes())
-
             mine_cells.update(sentence.known_mines())
 
-        print("mark safe cells  " + str(safe_cells))
         for cell in safe_cells:
             self.mark_safe(cell)
 
-        print("mark mine cells  " + str(mine_cells))
         for cell in mine_cells:
             self.mark_mine(cell)
