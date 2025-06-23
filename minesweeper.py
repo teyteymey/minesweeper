@@ -169,13 +169,17 @@ class MinesweeperAI():
         """
         print("ai mark mine " + str(self))
         self.mines.add(cell)
+        to_remove = []
         for sentence in self.knowledge:
             # if all cells are mines or only one cell left that is a mine, remove the sentence cuz info is already not useful
             if sentence.count == len(sentence.cells) or sentence.cells == cell:
                 print("remove sentence")
-                self.knowledge.remove(sentence)
+                to_remove.append(sentence)
             else:
                 sentence.mark_mine(cell)
+
+        for sentence in to_remove:
+            self.knowledge.remove(sentence)
 
     def mark_safe(self, cell):
         """
@@ -184,13 +188,17 @@ class MinesweeperAI():
         """
         # print("ai mark safe " + str(cell))
         self.safes.add(cell)
+        to_remove = []
         for sentence in self.knowledge:
             # remove sentence if we know all cells are safe already
             if sentence.count == 0:
                 print("remove sentence")
-                self.knowledge.remove(sentence)
+                to_remove.append(sentence)
             else:
                 sentence.mark_safe(cell)
+        
+        for sentence in to_remove:
+            self.knowledge.remove(sentence)
 
     def add_knowledge(self, cell, count):
         """
@@ -215,10 +223,15 @@ class MinesweeperAI():
 
         # Get neighbours and get unknown ones only
         neighbour_cells = self.neighbours(cell)
-        unexplored_cells = neighbour_cells.difference(self.mines, self.safes)
-        new_knowledge = Sentence(unexplored_cells, count)
-        self.knowledge.append(new_knowledge)
+        unexplored_cells = neighbour_cells.difference(self.safes, self.moves_made)
+        not_counting_mines = len(unexplored_cells)
+        unexplored_cells.difference_update(self.mines)
+        if (unexplored_cells != set()):
+            new_knowledge = Sentence(unexplored_cells, count-(not_counting_mines-len(unexplored_cells)))
+            self.knowledge.append(new_knowledge)
 
+        #sabemos que 2,3 es una mina. de los 8 neighbours quitamos los safe y los moves made para saber los restantes que son minas. si quitamos las minas de alrededor sabemos cuantas minas hay
+        # si restamos el len del set primero menos las minas que hay alrededor que sabemos
         self.infer_knowledge()
 
         self.resolve_cells_from_knowledge()
@@ -287,6 +300,8 @@ class MinesweeperAI():
                     print(str(sentence1) + " is subset of " + str(sentence2))
                     print("INFERRED SENTENCE")
                     print(str(inferred_sentence))
+                    if (inferred_cells == set()):
+                        raise RuntimeError("Inconsistent knowledge") 
                     new_knowledge.append(inferred_sentence)
                     used_knowledge.append(sentence2)
                 
