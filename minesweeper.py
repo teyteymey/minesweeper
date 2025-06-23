@@ -269,7 +269,7 @@ class MinesweeperAI():
         # Remove self
         neighbours.remove(cell)
         # Remove cells that are out of board in a very cool way hehehe
-        neighbours.difference_update({cell for cell in neighbours if any(x in {-1, 8} for x in cell)})
+        neighbours.difference_update({cell for cell in neighbours if any(x in {-1, self.height} for x in cell)})
         return neighbours
     
     # Used to get new knowledge from existing sentences
