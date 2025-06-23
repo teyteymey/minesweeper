@@ -171,7 +171,7 @@ class MinesweeperAI():
         self.mines.add(cell)
         to_remove = []
         for sentence in self.knowledge:
-            # if all cells are mines or only one cell left that is a mine, remove the sentence cuz info is already not useful
+            # If all cells are mines or only one cell left that is a mine, remove the sentence because the info is already not useful
             if sentence.count == len(sentence.cells) or sentence.cells == cell:
                 print("remove sentence")
                 to_remove.append(sentence)
@@ -190,7 +190,7 @@ class MinesweeperAI():
         self.safes.add(cell)
         to_remove = []
         for sentence in self.knowledge:
-            # remove sentence if we know all cells are safe already
+            # Remove sentence if we know all cells are already safe
             if sentence.count == 0:
                 print("remove sentence")
                 to_remove.append(sentence)
@@ -230,8 +230,9 @@ class MinesweeperAI():
             new_knowledge = Sentence(unexplored_cells, count-(not_counting_mines-len(unexplored_cells)))
             self.knowledge.append(new_knowledge)
 
-        #sabemos que 2,3 es una mina. de los 8 neighbours quitamos los safe y los moves made para saber los restantes que son minas. si quitamos las minas de alrededor sabemos cuantas minas hay
-        # si restamos el len del set primero menos las minas que hay alrededor que sabemos
+        # We know that 2,3 is a mine. Of the 8 neighbours, we remove the safe and moves made to know the remaining ones that are mines.
+        # If we remove the mines around, we know how many mines there are.
+        # If we subtract the length of the first set minus the mines we know around
         self.infer_knowledge()
 
         self.resolve_cells_from_knowledge()
@@ -278,9 +279,9 @@ class MinesweeperAI():
             for j in range(-1,2):
                 neighbours.add((cell[0]+i, cell[1]+j))
 
-        #remove self
+        # Remove self
         neighbours.remove(cell)
-        # remove cells that are out of board in a very cool way hehehe
+        # Remove cells that are out of board in a very cool way hehehe
         neighbours.difference_update({cell for cell in neighbours if any(x in {-1, 8} for x in cell)})
         return neighbours
     
@@ -306,14 +307,14 @@ class MinesweeperAI():
                     used_knowledge.append(sentence2)
                 
         
-        # do it separately to avoid writing while iterating
+        # Do it separately to avoid writing while iterating
         for sentence in new_knowledge:
-            #sometimes we infer the same from different sentences
+            # Sometimes we infer the same from different sentences
             if sentence not in self.knowledge:
                 self.knowledge.append(sentence)
 
         for sentence in used_knowledge:
-            #sometimes we use the same sentence to infer and it is already removed
+            # Sometimes we use the same sentence to infer and it is already removed
             if sentence in self.knowledge:
                 self.knowledge.remove(sentence)
 
@@ -337,5 +338,3 @@ class MinesweeperAI():
         print("mark mine cells  " + str(mine_cells))
         for cell in mine_cells:
             self.mark_mine(cell)
-
-
