@@ -1,7 +1,4 @@
-import itertools
 import random
-import numpy as np
-
 
 class Minesweeper():
     """
@@ -221,11 +218,13 @@ class MinesweeperAI():
         # We know that 2,3 is a mine. Of the 8 neighbours, we remove the safe and moves_made to know the remaining ones that are mines.
         # If we subtract the length of the first set minus the lenght of the second (removing mines) we know how many mines there is around and we need to substract from count
 
-        self.infer_knowledge()
+        can_draw_info = True
 
-        self.resolve_cells_from_knowledge()
+        while can_draw_info:
+            print("can draw info")
+            self.infer_knowledge()
+            can_draw_info = self.resolve_cells_from_knowledge()
 
-        self.infer_knowledge()
 
     def make_safe_move(self):
         """
@@ -316,3 +315,12 @@ class MinesweeperAI():
 
         for cell in mine_cells:
             self.mark_mine(cell)
+
+        print(str(safe_cells))
+
+        print(str(mine_cells))
+
+        # meaning some conclutions were drawn, return True if we continue and False otherwise
+        if safe_cells != set() or mine_cells != set():
+            return True
+        return False
