@@ -129,7 +129,7 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        if cell in self.cells and self.count > 0:
+        if cell in self.cells:
             self.cells.remove(cell)
 
 
@@ -160,16 +160,8 @@ class MinesweeperAI():
         to mark that cell as a mine as well.
         """
         self.mines.add(cell)
-        to_remove = []
         for sentence in self.knowledge:
-            # If all cells are mines or only one cell left that is a mine, remove the sentence because the info is already not useful
-            if sentence.count == len(sentence.cells) or sentence.cells == cell:
-                to_remove.append(sentence)
-            else:
-                sentence.mark_mine(cell)
-
-        for sentence in to_remove:
-            self.knowledge.remove(sentence)
+            sentence.mark_mine(cell)
 
     def mark_safe(self, cell):
         """
@@ -177,16 +169,8 @@ class MinesweeperAI():
         to mark that cell as safe as well.
         """
         self.safes.add(cell)
-        to_remove = []
         for sentence in self.knowledge:
-            # Remove sentence if we know all cells are already safe
-            if sentence.count == 0:
-                to_remove.append(sentence)
-            else:
-                sentence.mark_safe(cell)
-        
-        for sentence in to_remove:
-            self.knowledge.remove(sentence)
+            sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
         """
@@ -223,6 +207,16 @@ class MinesweeperAI():
         while can_draw_info:
             self.infer_knowledge()
             can_draw_info = self.resolve_cells_from_knowledge()
+            self.cleanup()
+
+    def cleanup(self):
+        """
+        Happens when we have safes and mines in the same sentence and get removed consecutively that we get an empty set since
+        removing the whole sentence cannot be detected.
+        """
+        for sentence in self.knowledge:
+            if sentence.count < 0 or sentence.cells == set():
+                self.knowledge.remove(sentence)
 
 
     def make_safe_move(self):
@@ -273,13 +267,11 @@ class MinesweeperAI():
     # Used to get new knowledge from existing sentences
     def infer_knowledge(self):
         new_knowledge = []
-        used_knowledge = []
         for sentence1 in self.knowledge:
             for sentence2 in self.knowledge:
                 if (
                     sentence1.cells.issubset(sentence2.cells)
                     and sentence1 != sentence2
-                    and sentence1.count >= 1
                     and sentence2.count >= 1
                 ):
                     inferred_cells = sentence2.cells.difference(sentence1.cells)
@@ -288,7 +280,6 @@ class MinesweeperAI():
                     if inferred_cells == set():
                         raise RuntimeError("Inconsistent knowledge")
                     new_knowledge.append(inferred_sentence)
-                    used_knowledge.append(sentence2)
 
         # Do it separately to avoid writing while iterating
         for sentence in new_knowledge:
@@ -296,18 +287,21 @@ class MinesweeperAI():
             if sentence not in self.knowledge:
                 self.knowledge.append(sentence)
 
-        for sentence in used_knowledge:
-            # Sometimes we use the same sentence to infer and it is already removed
-            if sentence in self.knowledge:
-                self.knowledge.remove(sentence)
-
     # Check if we can mark any cell as mine or safe
     def resolve_cells_from_knowledge(self):
         safe_cells = set()
         mine_cells = set()
+        explored_sentences = []
         for sentence in self.knowledge:
             safe_cells.update(sentence.known_safes())
             mine_cells.update(sentence.known_mines())
+            # If we drew conclusions of this and can mark them as mines or safe, remove sentence
+            if sentence.known_safes() != set() or sentence.known_mines() != set():
+                print("to remove: " + str(sentence))
+                explored_sentences.append(sentence)
+
+        for sentence_to_remove in explored_sentences:
+            self.knowledge.remove(sentence_to_remove)
 
         for cell in safe_cells:
             self.mark_safe(cell)
@@ -319,3 +313,8 @@ class MinesweeperAI():
         if safe_cells != set() or mine_cells != set():
             return True
         return False
+
+    def print_knowledge(self):
+        print("Knowledge")
+        for sentence in self.knowledge:
+            print(str(sentence))
