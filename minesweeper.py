@@ -221,7 +221,6 @@ class MinesweeperAI():
         can_draw_info = True
 
         while can_draw_info:
-            print("can draw info")
             self.infer_knowledge()
             can_draw_info = self.resolve_cells_from_knowledge()
 
@@ -315,10 +314,6 @@ class MinesweeperAI():
 
         for cell in mine_cells:
             self.mark_mine(cell)
-
-        print(str(safe_cells))
-
-        print(str(mine_cells))
 
         # meaning some conclutions were drawn, return True if we continue and False otherwise
         if safe_cells != set() or mine_cells != set():
