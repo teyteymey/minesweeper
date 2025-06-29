@@ -1,5 +1,5 @@
 ## What is this
-This code is part of a project for CS50AI course by Harvard university. The ask was to code an AI that is able to play tic-tac-toe optimally. For these, I implemented the following functions:
+This code is part of a project for CS50AI course by Harvard university. The ask was to code an AI that is able to play Minesweepere optimally. For these, I implemented the following functions:
 
 ### Sentence Class
 
