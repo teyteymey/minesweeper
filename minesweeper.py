@@ -103,15 +103,15 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        if (self.count != 0 and self.count == len(self.cells)):
+        if self.count != 0 and self.count == len(self.cells):
             return self.cells
         return set()
-    
+
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        if (self.count == 0):
+        if self.count == 0:
             return self.cells
         return set()
 
@@ -195,8 +195,10 @@ class MinesweeperAI():
         unexplored_cells = neighbour_cells.difference(self.safes, self.moves_made)
         not_counting_mines = len(unexplored_cells)
         unexplored_cells.difference_update(self.mines)
-        if (unexplored_cells != set()):
-            new_knowledge = Sentence(unexplored_cells, count-(not_counting_mines-len(unexplored_cells)))
+        if unexplored_cells != set():
+            new_knowledge = Sentence(
+                unexplored_cells, count - (not_counting_mines - len(unexplored_cells))
+            )
             self.knowledge.append(new_knowledge)
 
         # We know that 2,3 is a mine. Of the 8 neighbours, we remove the safe and moves_made to know the remaining ones that are mines.
@@ -217,7 +219,6 @@ class MinesweeperAI():
         for sentence in self.knowledge:
             if sentence.count < 0 or sentence.cells == set():
                 self.knowledge.remove(sentence)
-
 
     def make_safe_move(self):
         """
@@ -251,7 +252,7 @@ class MinesweeperAI():
             return possible_moves.pop()
 
         return None
-    
+
     def neighbours(self, cell):
         neighbours = set()
         for i in range(-1, 2):
@@ -261,9 +262,11 @@ class MinesweeperAI():
         # Remove self
         neighbours.remove(cell)
         # Remove cells that are out of board in a very cool way hehehe
-        neighbours.difference_update({cell for cell in neighbours if any(x in {-1, self.height} for x in cell)})
+        neighbours.difference_update(
+            {cell for cell in neighbours if any(x in {-1, self.height} for x in cell)}
+        )
         return neighbours
-    
+
     # Used to get new knowledge from existing sentences
     def infer_knowledge(self):
         new_knowledge = []
