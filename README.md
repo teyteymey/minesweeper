@@ -1,7 +1,7 @@
 ## What is this
 This code is part of a project for CS50AI course by Harvard university. The ask was to code an AI that is able to play tic-tac-toe optimally. For these, I implemented the following functions:
 
-## Sentence Class
+### Sentence Class
 
 #### `known_mines`
 - Returns a `set` of all the cells in `self.cells` that are **known to be mines**.
@@ -23,7 +23,7 @@ This code is part of a project for CS50AI course by Harvard university. The ask 
   - Updates the sentence to remain logically consistent given that `cell` is safe.
 - If `cell` is **not** in the sentence, no action is taken.
 
-## MinesweeperAI Class
+### MinesweeperAI Class
 
 #### `add_knowledge(cell, count)`
 - Accepts a `cell` (tuple `(i, j)`) and its corresponding `count` (number of neighboring mines).
@@ -61,7 +61,7 @@ This code is part of a project for CS50AI course by Harvard university. The ask 
 ## Usage:
 Requires Python(3) and Python package installer pip(3) to run:
 
-Install requirements: $pip3 install -r requirements.txt
+Install requirements: pip3 install -r requirements.txt
 
-Run Game: $python3 runner.py
+Run Game: python3 runner.py
 
